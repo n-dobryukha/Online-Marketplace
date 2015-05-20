@@ -1,4 +1,4 @@
-﻿package com.ndobriukha.onlinemarketplace.dao;
+package com.ndobriukha.onlinemarketplace.dao;
 
 
 /** Фабрика объектов для работы с базой данных */

@@ -14,8 +14,8 @@ import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
-@SuiteClasses({ OracleUserDaoTest.class/*, OracleItemDaoTest.class,
-		OracleBidDaoTest.class*/ })
+@SuiteClasses({ OracleUserDaoTest.class, OracleItemDaoTest.class,
+		OracleBidDaoTest.class })
 public class AllTests {
 	@BeforeClass
 	public static void setUp() throws NamingException, SQLException {

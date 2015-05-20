@@ -34,7 +34,7 @@ public class MyQueryRunner extends AbstractQueryRunner {
 
         try {
             stmt = conn.prepareStatement(sql, columnNames);
-            this.fillStatement(stmt, params);
+        	this.fillStatement(stmt, params);
             stmt.executeUpdate();
             ResultSet resultSet = stmt.getGeneratedKeys();
             generatedKeys = rsh.handle(resultSet);

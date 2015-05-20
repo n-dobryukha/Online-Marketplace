@@ -4,6 +4,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 import javax.naming.NamingException;
+import javax.print.attribute.standard.PresentationDirection;
 import javax.sql.DataSource;
 
 import org.apache.commons.dbutils.QueryRunner;
@@ -118,15 +119,16 @@ public class OracleUserDaoTest {
 	 */
 	@Test(expected = PersistConstraintException.class)
 	public void testDuplicateexception() throws SQLException, PersistException {
-		/*OracleUserDao oraUserDao = (OracleUserDao) oraFactory.getDao(dataSource, User.class);
+		OracleUserDao oraUserDao = (OracleUserDao) oraFactory.getDao(dataSource, User.class);
 		String sql = oraUserDao.getCreateQuery();
 		String login = "login";
-		int count = runner.update(sql, "Full Name", "Address",
-				login, "password", "email");
-		User user = oraUserDao.create("Full Name", "Address", login,
+		runner.update(sql, "Full Name", "Address",
+				login, "password", "email");		
+		User user = new User("Full Name", "Address", login,
 				"password", "email");
+		oraUserDao.save(user);
 		Assert.assertNotNull("Persist object is null", user);
-		Assert.assertNotNull("After persist object ID is null", user.getId());*/
+		Assert.assertNotNull("After persist object ID is null", user.getId());
 	}
 
 	/**
@@ -143,15 +145,16 @@ public class OracleUserDaoTest {
 	 */
 	@Test
 	public void testGetUserByLogin() throws PersistException {
-		/*OracleUserDao oraUserDao = (OracleUserDao) oraFactory.getDao(dataSource, User.class);
+		OracleUserDao oraUserDao = (OracleUserDao) oraFactory.getDao(dataSource, User.class);
 		String login = "login";
-		User createdUser = oraUserDao.create("Full Name", "Address", login,
+		User createdUser = new User("Full Name", "Address", login,
 				"password", "email");
+		oraUserDao.save(createdUser);
 		Assert.assertNotNull("Persist object is null", createdUser);
 		Assert.assertNotNull("After persist object ID is null",
 				createdUser.getId());
 		User receivedUser = oraUserDao.getUserByLogin(login);
-		Assert.assertEquals(createdUser, receivedUser);*/
+		Assert.assertEquals(createdUser, receivedUser);
 	}
 
 	/**
@@ -167,9 +170,9 @@ public class OracleUserDaoTest {
 	 */
 	@Test(expected = PersistExistsException.class)
 	public void testGetNotExistsUserByLogin() throws PersistException {
-		/*OracleUserDao oraUserDao = (OracleUserDao) oraFactory.getDao(dataSource, User.class);
+		OracleUserDao oraUserDao = (OracleUserDao) oraFactory.getDao(dataSource, User.class);
 		String login = "login";
-		User gettedUser = oraUserDao.getUserByLogin(login);*/
+		oraUserDao.getUserByLogin(login);
 	}
 
 	/**
@@ -186,9 +189,10 @@ public class OracleUserDaoTest {
 	 */
 	@Test
 	public void testUpdateUser() throws PersistException {
-		/*OracleUserDao oraUserDao = (OracleUserDao) oraFactory.getDao(dataSource, User.class);
-		User createdUser = oraUserDao.create("Full Name", "Address", "login",
+		OracleUserDao oraUserDao = (OracleUserDao) oraFactory.getDao(dataSource, User.class);
+		User createdUser = new User("Full Name", "Address", "login",
 				"password", "email");
+		oraUserDao.save(createdUser);
 		Assert.assertNotNull("Persist object is null", createdUser);
 		Assert.assertNotNull("After persist object ID is null",
 				createdUser.getId());
@@ -199,9 +203,23 @@ public class OracleUserDaoTest {
 		receivedUser.setLogin("New login");
 		receivedUser.setPassword("New password");
 		receivedUser.setEmail("New email");
-		oraUserDao.update(receivedUser);
-		User receivedUpdatesUser = oraUserDao.getByPK(receivedUser.getId());
+		oraUserDao.save(receivedUser);
+		User receivedUpdatesUser = oraUserDao.get(receivedUser.getId());
 		Assert.assertNotNull("Updates object is null", receivedUpdatesUser);
-		Assert.assertEquals(receivedUser, receivedUpdatesUser);*/
+		Assert.assertEquals(receivedUser, receivedUpdatesUser);
+	}
+	
+	@Test
+	public void testDeleteUser() throws PersistException {
+		OracleUserDao oraUserDao = (OracleUserDao) oraFactory.getDao(dataSource, User.class);
+		User user = new User("Full Name", "Address", "login",
+				"password", "email");
+		oraUserDao.save(user);
+		Assert.assertNotNull("Persist object is null", user);
+		Assert.assertNotNull("After persist object ID is null",
+				user.getId());
+		oraUserDao.delete(user);
+		User receivedUser = oraUserDao.get(user.getId());
+		Assert.assertNull("Received object is not null", receivedUser);
 	}
 }

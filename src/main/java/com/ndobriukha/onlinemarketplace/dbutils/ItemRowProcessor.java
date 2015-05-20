@@ -17,13 +17,14 @@ public class ItemRowProcessor extends BasicRowProcessor {
 		Item item = new Item();
 		item.setId(rs.getInt(1));
 		item.setSellerId(rs.getInt(2));
-		item.setDescription(rs.getString(3));
-		item.setStartPrice(rs.getDouble(4));
-		item.setTimeLeft(rs.getInt(5));
-		item.setStartBidding((rs.getTimestamp(6)));
-		item.setBuyItNow(BooleanType.valueOf(rs.getString(7)));
-		item.setBidIncrement(rs.getDouble(8));
-		item.setSold(BooleanType.valueOf(rs.getString(9)));
+		item.setTitle(rs.getString(3));
+		item.setDescription(rs.getString(4));
+		item.setStartPrice(rs.getDouble(5));
+		item.setTimeLeft(rs.getInt(6));
+		item.setStartBidding((rs.getTimestamp(7)));
+		item.setBuyItNow(BooleanType.valueOf(rs.getString(8)));
+		item.setBidIncrement(rs.getDouble(9));
+		item.setSold(BooleanType.valueOf(rs.getString(10)));
 		return (T) item;
 	}
 

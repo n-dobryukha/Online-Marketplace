@@ -13,6 +13,7 @@ public class Item implements RetrieveFieldsValues, Identified {
 	
 	private Integer id = null;
 	private Integer sellerId;
+	private String title;
 	private String description;
 	private double startPrice;
 	private int timeLeft;
@@ -25,11 +26,12 @@ public class Item implements RetrieveFieldsValues, Identified {
 		this.sold = BooleanType.N;
 	}
 
-	public Item(int sellerId, String description, double startPrice,
+	public Item(int sellerId, String title, String description, double startPrice,
 			int timeLeft, Timestamp startBidding, BooleanType buyItNow,
 			double bidIncrement) {
 		this();
 		this.sellerId = sellerId;
+		this.title = title;
 		this.description = description;
 		this.startPrice = startPrice;
 		this.timeLeft = timeLeft;
@@ -46,13 +48,21 @@ public class Item implements RetrieveFieldsValues, Identified {
 	public void setId(Integer id) {
 		this.id = id;
 	}
-
+	
 	public Integer getSellerId() {
 		return sellerId;
 	}
 
 	public void setSellerId(Integer sellerId) {
 		this.sellerId = sellerId;
+	}
+	
+	public String getTitle() {
+		return title;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
 	}
 
 	public String getDescription() {
@@ -121,7 +131,7 @@ public class Item implements RetrieveFieldsValues, Identified {
 
 	@Override
 	public Object[] getFieldsValues() {
-		return new Object[] { getSellerId(), getDescription(), getStartPrice(),
+		return new Object[] { getSellerId(), getTitle(), getDescription(), getStartPrice(),
 				getTimeLeft(), getStartBidding(), getBuyItNow().toString(),
 				getBidIncrement(), getSold().toString() };
 	}
@@ -146,6 +156,7 @@ public class Item implements RetrieveFieldsValues, Identified {
 		temp = Double.doubleToLongBits(startPrice);
 		result = prime * result + (int) (temp ^ (temp >>> 32));
 		result = prime * result + timeLeft;
+		result = prime * result + ((title == null) ? 0 : title.hashCode());
 		return result;
 	}
 
@@ -189,6 +200,11 @@ public class Item implements RetrieveFieldsValues, Identified {
 				.doubleToLongBits(other.startPrice))
 			return false;
 		if (timeLeft != other.timeLeft)
+			return false;
+		if (title == null) {
+			if (other.title != null)
+				return false;
+		} else if (!title.equals(other.title))
 			return false;
 		return true;
 	}

@@ -1,14 +1,28 @@
 package com.ndobriukha.onlinemarketplace.dao.oracle;
 
+import java.sql.SQLException;
+import java.util.List;
+
 import javax.sql.DataSource;
 
+import org.apache.commons.dbutils.QueryRunner;
+import org.apache.commons.dbutils.handlers.BeanListHandler;
+
 import com.ndobriukha.onlinemarketplace.dao.CommonDao;
+import com.ndobriukha.onlinemarketplace.dao.PersistException;
+import com.ndobriukha.onlinemarketplace.dao.PersistExistsException;
+import com.ndobriukha.onlinemarketplace.dbutils.UserRowProcessor;
 import com.ndobriukha.onlinemarketplace.models.User;
 
 public class OracleUserDao extends CommonDao<User> {
 
 	public OracleUserDao(DataSource dataSource) {
-		super(dataSource, User.class);
+		super(dataSource, User.class, new UserRowProcessor());
+	}
+	
+	@Override
+	public String getTableName() {
+		return "USERS";
 	}
 	
 	@Override
@@ -17,33 +31,13 @@ public class OracleUserDao extends CommonDao<User> {
 				"PASSWORD", "EMAIL" };
 	}
 
-	@Override
-	public String getSelectQuery() {
-		return "SELECT id, fullName, billingAddress, login, password, email FROM Users";
-	}
-
-	@Override
-	public String getUpdateQuery() {
-		return "UPDATE Users SET fullName = ?, billingAddress = ?, login = ?, password = ?, email = ? WHERE id = ?";
-	}
-
-	@Override
-	public String getDeleteQuery() {
-		return "DELETE FROM Users WHERE id = ?";
-	}
-/*
-	public User create(String fullName, String billingAddress, String login, String password, String email) throws PersistException {
-		User user = new User(fullName, billingAddress, login, password, email);
-		return persist(user);
-	}
-
 	public User getUserByLogin(String login) throws PersistExistsException, PersistException {
 		String sql = getSelectQuery() + " WHERE login = ?";
-		QueryRunner query = new QueryRunner();
-		BeanListHandler<User> beanListHandler = new BeanListHandler<User>(User.class);
+		QueryRunner query = new QueryRunner(dataSource);
+		BeanListHandler<User> beanListHandler = new BeanListHandler<User>(User.class, convert);
 		List<User> users = null;
 		try {
-			users = query.query(connection, sql, beanListHandler, login);
+			users = query.query(sql, beanListHandler, login);
 		} catch (SQLException e) {
 			throw new PersistException(e);
 		}
@@ -54,10 +48,5 @@ public class OracleUserDao extends CommonDao<User> {
 			throw new PersistException("Received more than one record.");
 		}						
 		return users.get(0);
-	}
-*/
-	@Override
-	public String getTableName() {
-		return "Users";
-	}
+	}	
 }
