@@ -1,0 +1,18 @@
+<?xml version='1.0' encoding='utf-8'?>
+<Context>
+	<Resource name="jdbc/marketplace" auth="Container"
+		factory="oracle.ucp.jdbc.PoolDataSourceImpl"
+ 		type="oracle.ucp.jdbc.PoolDataSource"
+		connectionFactoryClassName="oracle.jdbc.pool.OracleDataSource"
+		initialPoolSize="5"
+		minPoolSize="1"
+		maxPoolSize="5"
+		inactiveConnectionTimeout="20"
+		connectionCachingEnabled="true"
+		validateConnectionOnBorrow="true"
+		fastConnectionFailoverEnabled="true"
+		connectionPoolName="marketplace"
+		sqlForValidateConnection="select 1 from DUAL"
+		url="jdbc:oracle:thin:@127.0.0.1:1521:xe"
+		user="MARKETPLACE" password="marketplace" />
+</Context>
