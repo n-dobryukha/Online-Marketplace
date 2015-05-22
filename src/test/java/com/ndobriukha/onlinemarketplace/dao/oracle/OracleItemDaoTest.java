@@ -1,5 +1,7 @@
 package com.ndobriukha.onlinemarketplace.dao.oracle;
 
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Date;
@@ -24,14 +26,15 @@ public class OracleItemDaoTest {
 	private DataSource dataSource;
 	private QueryRunner runner;
 
-	private User user = new User("Full Name", "Address", "login", "password",
-			"email@example.com");
+	private User user;
 
 	public OracleItemDaoTest() {
 	}
 
 	@Before
-	public void setUp() throws PersistException, SQLException, NamingException {
+	public void setUp() throws PersistException, SQLException, NamingException, NoSuchAlgorithmException, InvalidKeySpecException {
+		user = new User("Full Name", "Address", "login", "password",
+				"email@example.com");
 		oraFactory = new OracleDaoFactory("jdbc/marketplace");
 		dataSource = oraFactory.getContext();
 		runner = new QueryRunner(dataSource);

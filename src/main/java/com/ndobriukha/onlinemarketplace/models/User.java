@@ -1,5 +1,9 @@
 package com.ndobriukha.onlinemarketplace.models;
 
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
+
+import com.ndobriukha.onlinemarketplace.PasswordHash;
 import com.ndobriukha.onlinemarketplace.dao.Identified;
 
 public class User implements RetrieveFieldsValues, Identified {
@@ -15,11 +19,11 @@ public class User implements RetrieveFieldsValues, Identified {
 	}
 
 	public User(String fullName, String billingAddress, String login,
-			String password, String email) {
+			String password, String email) throws NoSuchAlgorithmException, InvalidKeySpecException {
 		this.fullName = fullName;
 		this.billingAddress = billingAddress;
 		this.login = login;
-		this.password = password;
+		this.password = PasswordHash.createHash(password);
 		this.email = email;
 	}
 

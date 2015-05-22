@@ -1,6 +1,7 @@
 package com.ndobriukha.onlinemarketplace.dao.oracle;
 
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Map;
 
 import javax.naming.Context;
@@ -24,9 +25,15 @@ public class OracleDaoFactory implements DaoFactory<DataSource> {
     
     @SuppressWarnings("rawtypes")
 	public OracleDaoFactory(String context) throws NamingException {
-    	Context initContext = new InitialContext();
-		Context envContext = (Context) initContext.lookup("java:/comp/env");
-		dataSource = (DataSource) envContext.lookup(context);
+    	Hashtable<String, String> env = new Hashtable<String, String>();
+		env.put(Context.INITIAL_CONTEXT_FACTORY,
+				"com.sun.jndi.fscontext.RefFSContextFactory");
+		Context ctx = new InitialContext(env);
+		dataSource = (DataSource) ctx.lookup(context);
+//    	Context initContext = new InitialContext();
+//		Context envContext = (Context) initContext.lookup("java:/comp/env");
+//		dataSource = (DataSource) envContext.lookup(context);
+		
 		
 		creators = new HashMap<Class, DaoCreator<DataSource>>();
         creators.put(User.class, new DaoCreator<DataSource>() {

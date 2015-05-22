@@ -1,6 +1,5 @@
 package com.ndobriukha.onlinemarketplace.dao.oracle;
 
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Date;
@@ -15,7 +14,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.ndobriukha.onlinemarketplace.dao.DaoFactory;
 import com.ndobriukha.onlinemarketplace.dao.PersistException;
 import com.ndobriukha.onlinemarketplace.models.Bid;
 import com.ndobriukha.onlinemarketplace.models.Item;

@@ -1,10 +1,11 @@
 package com.ndobriukha.onlinemarketplace.dao.oracle;
 
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.sql.SQLException;
 import java.util.List;
 
 import javax.naming.NamingException;
-import javax.print.attribute.standard.PresentationDirection;
 import javax.sql.DataSource;
 
 import org.apache.commons.dbutils.QueryRunner;
@@ -31,7 +32,7 @@ public class OracleUserDaoTest {
 	public void setUp() throws PersistException, SQLException, NamingException {
 		oraFactory = new OracleDaoFactory("jdbc/marketplace");
 		dataSource = oraFactory.getContext();
-		runner = new QueryRunner(dataSource);		
+		runner = new QueryRunner(dataSource);
 	}
 
 	@After
@@ -40,7 +41,7 @@ public class OracleUserDaoTest {
 	}
 
 	/**
-	 * 1.	Получение всех пользователей.
+	 * 1. Получение всех пользователей.
 	 * 
 	 * Step to reproduce: С помощью sql-скриптов создать в базе несколько
 	 * пользователей. Вызвать метод для получения всех существующих
@@ -51,12 +52,13 @@ public class OracleUserDaoTest {
 	 * вызванный метод.
 	 * 
 	 * @throws PersistException
-	 * @throws NamingException 
+	 * @throws NamingException
 	 */
 	@Test
 	public void testBatchInsert() throws PersistException, NamingException {
 		try {
-			OracleUserDao oraUserDao = (OracleUserDao) oraFactory.getDao(dataSource, User.class);
+			OracleUserDao oraUserDao = (OracleUserDao) oraFactory.getDao(
+					dataSource, User.class);
 			String sql = oraUserDao.getCreateQuery();
 			String[][] params = { { "A", "A", "A", "A", "A" },
 					{ "B", "B", "B", "B", "B" }, { "C", "C", "C", "C", "C" } };
@@ -75,7 +77,7 @@ public class OracleUserDaoTest {
 	}
 
 	/**
-	 * 2.	Создание нового пользователя.
+	 * 2. Создание нового пользователя.
 	 * 
 	 * Step to reproduce: Вызвать метод для создания пользователя с определённым
 	 * логином и паролем. Вызвать метод для получения всех существующих
@@ -85,27 +87,25 @@ public class OracleUserDaoTest {
 	 * новый пользователь.
 	 * 
 	 * @throws PersistException
+	 * @throws InvalidKeySpecException
+	 * @throws NoSuchAlgorithmException
 	 */
 	@Test
-	public void testCreate() throws PersistException {
-		try {
-			OracleUserDao oraUserDao = (OracleUserDao) oraFactory.getDao(dataSource, User.class);
-			User user = new User("Full Name", "Address", "login",
-					"password", "email");
-			oraUserDao.save(user);
-			Assert.assertNotNull("After persist object ID is null",
-					user.getId());
-			List<User> users = oraUserDao.getAll();
-			Assert.assertEquals("More than one created User.", 1, users.size());
-			Assert.assertEquals(user, users.get(0));
-		} catch (PersistException e) {
-			System.err.println(e);
-			throw new PersistException(e);
-		}
+	public void testCreate() throws PersistException, NoSuchAlgorithmException,
+			InvalidKeySpecException {
+		OracleUserDao oraUserDao = (OracleUserDao) oraFactory.getDao(
+				dataSource, User.class);
+		User user = new User("Full Name", "Address", "login", "password",
+				"email");
+		oraUserDao.save(user);
+		Assert.assertNotNull("After persist object ID is null", user.getId());
+		List<User> users = oraUserDao.getAll();
+		Assert.assertEquals("More than one created User.", 1, users.size());
+		Assert.assertEquals(user, users.get(0));
 	}
 
 	/**
-	 * 2.1	Создание нового пользователя.
+	 * 2.1 Создание нового пользователя.
 	 * 
 	 * Step to reproduce: С помощью sql-скрипта создать в базе пользователя с
 	 * логином «login». Вызвать метод для создания пользователя с логином
@@ -116,23 +116,25 @@ public class OracleUserDaoTest {
 	 * 
 	 * @throws SQLException
 	 * @throws PersistException
+	 * @throws InvalidKeySpecException
+	 * @throws NoSuchAlgorithmException
 	 */
 	@Test(expected = PersistConstraintException.class)
-	public void testDuplicateexception() throws SQLException, PersistException {
-		OracleUserDao oraUserDao = (OracleUserDao) oraFactory.getDao(dataSource, User.class);
+	public void testDuplicateexception() throws SQLException, PersistException,
+			NoSuchAlgorithmException, InvalidKeySpecException {
+		OracleUserDao oraUserDao = (OracleUserDao) oraFactory.getDao(
+				dataSource, User.class);
 		String sql = oraUserDao.getCreateQuery();
 		String login = "login";
-		runner.update(sql, "Full Name", "Address",
-				login, "password", "email");		
-		User user = new User("Full Name", "Address", login,
-				"password", "email");
+		runner.update(sql, "Full Name", "Address", login, "password", "email");
+		User user = new User("Full Name", "Address", login, "password", "email");
 		oraUserDao.save(user);
 		Assert.assertNotNull("Persist object is null", user);
 		Assert.assertNotNull("After persist object ID is null", user.getId());
 	}
 
 	/**
-	 * 3.	Получение пользователя по его логину.
+	 * 3. Получение пользователя по его логину.
 	 * 
 	 * Step to reproduce: С помощью sql-скрипта создать в базе пользователя с
 	 * логином «login». Вызвать метод для получения пользователя с логином
@@ -142,13 +144,16 @@ public class OracleUserDaoTest {
 	 * пользователя совпадают с данными внесёнными помощью sql-скрипта.
 	 * 
 	 * @throws PersistException
+	 * @throws InvalidKeySpecException 
+	 * @throws NoSuchAlgorithmException 
 	 */
 	@Test
-	public void testGetUserByLogin() throws PersistException {
-		OracleUserDao oraUserDao = (OracleUserDao) oraFactory.getDao(dataSource, User.class);
+	public void testGetUserByLogin() throws PersistException, NoSuchAlgorithmException, InvalidKeySpecException {
+		OracleUserDao oraUserDao = (OracleUserDao) oraFactory.getDao(
+				dataSource, User.class);
 		String login = "login";
-		User createdUser = new User("Full Name", "Address", login,
-				"password", "email");
+		User createdUser = new User("Full Name", "Address", login, "password",
+				"email");
 		oraUserDao.save(createdUser);
 		Assert.assertNotNull("Persist object is null", createdUser);
 		Assert.assertNotNull("After persist object ID is null",
@@ -158,7 +163,7 @@ public class OracleUserDaoTest {
 	}
 
 	/**
-	 * 3.1	Получение пользователя по его логину.
+	 * 3.1 Получение пользователя по его логину.
 	 * 
 	 * Step to reproduce: Вызвать метод для получения пользователя с
 	 * несуществующим логином.
@@ -170,13 +175,14 @@ public class OracleUserDaoTest {
 	 */
 	@Test(expected = PersistExistsException.class)
 	public void testGetNotExistsUserByLogin() throws PersistException {
-		OracleUserDao oraUserDao = (OracleUserDao) oraFactory.getDao(dataSource, User.class);
+		OracleUserDao oraUserDao = (OracleUserDao) oraFactory.getDao(
+				dataSource, User.class);
 		String login = "login";
 		oraUserDao.getUserByLogin(login);
 	}
 
 	/**
-	 * 4.	Изменение данных пользователя.
+	 * 4. Изменение данных пользователя.
 	 * 
 	 * Step to reproduce: С помощью sql-скрипта создать в базе пользователя с
 	 * логином «login». Вызвать метод для получения пользователя с логином
@@ -186,10 +192,13 @@ public class OracleUserDaoTest {
 	 * совпадают со значениями соответствующей строки в таблице.
 	 * 
 	 * @throws PersistException
+	 * @throws InvalidKeySpecException 
+	 * @throws NoSuchAlgorithmException 
 	 */
 	@Test
-	public void testUpdateUser() throws PersistException {
-		OracleUserDao oraUserDao = (OracleUserDao) oraFactory.getDao(dataSource, User.class);
+	public void testUpdateUser() throws PersistException, NoSuchAlgorithmException, InvalidKeySpecException {
+		OracleUserDao oraUserDao = (OracleUserDao) oraFactory.getDao(
+				dataSource, User.class);
 		User createdUser = new User("Full Name", "Address", "login",
 				"password", "email");
 		oraUserDao.save(createdUser);
@@ -208,16 +217,16 @@ public class OracleUserDaoTest {
 		Assert.assertNotNull("Updates object is null", receivedUpdatesUser);
 		Assert.assertEquals(receivedUser, receivedUpdatesUser);
 	}
-	
+
 	@Test
-	public void testDeleteUser() throws PersistException {
-		OracleUserDao oraUserDao = (OracleUserDao) oraFactory.getDao(dataSource, User.class);
-		User user = new User("Full Name", "Address", "login",
-				"password", "email");
+	public void testDeleteUser() throws PersistException, NoSuchAlgorithmException, InvalidKeySpecException {
+		OracleUserDao oraUserDao = (OracleUserDao) oraFactory.getDao(
+				dataSource, User.class);
+		User user = new User("Full Name", "Address", "login", "password",
+				"email");
 		oraUserDao.save(user);
 		Assert.assertNotNull("Persist object is null", user);
-		Assert.assertNotNull("After persist object ID is null",
-				user.getId());
+		Assert.assertNotNull("After persist object ID is null", user.getId());
 		oraUserDao.delete(user);
 		User receivedUser = oraUserDao.get(user.getId());
 		Assert.assertNull("Received object is not null", receivedUser);
