@@ -29,11 +29,7 @@ public class OracleDaoFactory implements DaoFactory<DataSource> {
 		env.put(Context.INITIAL_CONTEXT_FACTORY,
 				"com.sun.jndi.fscontext.RefFSContextFactory");
 		Context ctx = new InitialContext(env);
-		dataSource = (DataSource) ctx.lookup(context);
-//    	Context initContext = new InitialContext();
-//		Context envContext = (Context) initContext.lookup("java:/comp/env");
-//		dataSource = (DataSource) envContext.lookup(context);
-		
+		dataSource = (DataSource) ctx.lookup(context);		
 		
 		creators = new HashMap<Class, DaoCreator<DataSource>>();
         creators.put(User.class, new DaoCreator<DataSource>() {

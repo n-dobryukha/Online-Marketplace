@@ -1,7 +1,12 @@
 package com.ndobriukha.onlinemarketplace.dao.oracle;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.sql.SQLException;
 import java.util.Hashtable;
+import java.util.Properties;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -22,24 +27,30 @@ import com.ndobriukha.onlinemarketplace.PasswordHashTest;
 		OracleBidDaoTest.class })
 public class AllTests {
 	@BeforeClass
-	public static void setUp() throws NamingException, SQLException {
+	public static void setUp() throws NamingException, SQLException, IOException {
+		Properties prop = new Properties();
+		
+		URL fileUrl = AllTests.class.getResource("/config.properties");		
+		InputStream input = new FileInputStream(fileUrl.getFile());
+		prop.load(input);
+		
 		Hashtable<String, String> env = new Hashtable<String, String>();
 		env.put(Context.INITIAL_CONTEXT_FACTORY,
 				"com.sun.jndi.fscontext.RefFSContextFactory");
-		InitialContext ic = new InitialContext(env);				
+		Context ctx = new InitialContext(env);
 
 		PoolDataSource pds = PoolDataSourceFactory.getPoolDataSource();
 		pds.setConnectionFactoryClassName("oracle.jdbc.pool.OracleDataSource");
-		pds.setURL("jdbc:oracle:thin:@//localhost:1521/XE");
-		pds.setUser("MARKETPLACE");
-		pds.setPassword("marketplace");
+		pds.setURL(prop.getProperty("url"));
+		pds.setUser(prop.getProperty("user"));
+		pds.setPassword(prop.getProperty("password"));
 		pds.setInitialPoolSize(5);
 		pds.setMinPoolSize(1);
 		pds.setMaxPoolSize(5);
 		pds.setInactiveConnectionTimeout(0);
 		pds.setSQLForValidateConnection("SELECT 1 FROM DUAL");
 
-		ic.unbind("java:/comp/env/jdbc/marketplace");
-		ic.bind("java:/comp/env/jdbc/marketplace", pds);
+		ctx.unbind("java:/comp/env/jdbc/marketplace");
+		ctx.bind("java:/comp/env/jdbc/marketplace", pds);
 	}
 }

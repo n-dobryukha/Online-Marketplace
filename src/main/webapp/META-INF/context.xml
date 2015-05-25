@@ -13,6 +13,6 @@
 		fastConnectionFailoverEnabled="true"
 		connectionPoolName="marketplace"
 		sqlForValidateConnection="select 1 from DUAL"
-		url="jdbc:oracle:thin:@127.0.0.1:1521:xe"
+		url="jdbc:oracle:thin:@localhost:1521:xe"
 		user="MARKETPLACE" password="marketplace" />
 </Context>
