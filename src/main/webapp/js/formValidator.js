@@ -16,8 +16,61 @@ require(
 	function( $, bootstrap, bootstrapValidator ){
     	
 		$(document).ready(function() {
-    		$('#formLogin').bootstrapValidator();
-    		
+    		$('#formLogin').bootstrapValidator({
+    			fields: {
+    				login: {
+    					validators: {
+    						blank: {}
+    					}    						
+    				},
+    				password: {
+    					validators: {
+    						blank: {}
+    					}    						
+    				}
+    			}
+    		})
+    		.on('success.form.bv', function(e) {
+    			e.preventDefault();
+	            var $form = $(e.target),
+	            	bv = $form.data('bootstrapValidator'),
+	            	data = {login: 1, password: 1};
+	            
+	            $.ajax({
+                    url: "./services/auth/login",
+                    type: "POST",
+                    data: data,
+                    cache: false,
+                    datatype: 'json',
+                         
+                    success: function (data, textStatus, jqXHR){
+                        //alert("success");
+                        switch (data.status) {
+                        case "SUCCESS" :
+                            window.location.replace("https://"+window.location.host+"<%=request.getContextPath() %>/secure/index.jsp");
+                        	break;
+                        case "NOTEXISTS":
+                        	bv.updateStatus("login","INVALID","blank")
+                    		bv.updateMessage("login","blank",data.errorMsg)
+                        	break;
+                        default:
+                        	break;
+                        }
+                    },
+                         
+                    error: function (jqXHR, textStatus, errorThrown){
+                        alert("error - HTTP STATUS: "+jqXHR.status);
+                    },
+                         
+                    complete: function(jqXHR, textStatus){
+                        //alert("complete");
+                    }                    
+                });
+    		});
+    		/*
+    		var bv = $('#formLogin').data("bootstrapValidator");
+    		;
+    		*/
     		$('#formRegistration').bootstrapValidator({
     			fields : {
     				login : {

@@ -12,6 +12,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.ndobriukha.onlinemarketplace.dao.oracle.OracleDaoFactory;
+import com.ndobriukha.onlinemarketplace.dao.oracle.OracleUserDao;
+import com.ndobriukha.onlinemarketplace.models.User;
 
 /**
  * Servlet implementation class Test
@@ -35,11 +37,13 @@ public class Test extends HttpServlet {
 			HttpServletResponse response) throws ServletException, IOException {
 		try {
 			OracleDaoFactory oraFactory = new OracleDaoFactory("java:/comp/env/jdbc/marketplace");
-	        Connection conn = oraFactory.getContext().getConnection();
+	        /*Connection conn = oraFactory.getContext().getConnection();
 	        System.out.println(conn);
 	        response.getWriter().println(conn);
 			conn.close();
-	        conn=null;
+	        conn=null;*/
+			OracleUserDao oraUserDao = (OracleUserDao) oraFactory.getDao(oraFactory.getContext(), User.class);
+			response.getWriter().println(oraUserDao);
 	        
 		} catch (NamingException | SQLException e) {
 			response.getWriter().println(e);

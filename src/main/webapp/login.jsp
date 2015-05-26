@@ -10,7 +10,8 @@
 <body>
 	<fieldset class="container-main">
 		<legend>Login</legend>
-		<form id="formLogin" class="form-horizontal" method="post"
+		<div class="label label-danger " role="alert">...</div>
+		<form id="formLogin" class="form-horizontal" method="post" action="./services/auth/login"
 			data-bv-message="This value is not valid"
 			data-bv-feedbackicons-valid="glyphicon glyphicon-ok"
 			data-bv-feedbackicons-invalid="glyphicon glyphicon-remove"
@@ -19,7 +20,7 @@
 				<label for="login" class="col-sm-4 control-label">Login</label>
 				<div class="col-sm-4">
 					<input type="text" class="form-control" id="login" name="login"
-						placeholder="Login" autofocus="autofocus" required="required">					
+						placeholder="Login" autofocus="autofocus" required="required" data-bv-validator="blank">					
 				</div>
 			</div>
 			<div class="form-group">
