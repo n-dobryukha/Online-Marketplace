@@ -10,7 +10,6 @@
 <body>
 	<fieldset class="container-main">
 		<legend>Login</legend>
-		<div class="label label-danger " role="alert">...</div>
 		<form id="formLogin" class="form-horizontal" method="post" action="./services/auth/login"
 			data-bv-message="This value is not valid"
 			data-bv-feedbackicons-valid="glyphicon glyphicon-ok"

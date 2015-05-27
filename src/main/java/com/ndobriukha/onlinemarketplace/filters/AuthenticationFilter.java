@@ -40,7 +40,8 @@ public class AuthenticationFilter implements Filter {
 		HttpServletResponse res = (HttpServletResponse) response;
 		HttpSession session = req.getSession(false);
 		if (session == null) {
-			res.sendRedirect("login.jsp");
+			this.context.log("OK");
+			res.sendRedirect("../login.jsp");
 		} else {
 			this.context.log(session.getId());
 			chain.doFilter(request, response);

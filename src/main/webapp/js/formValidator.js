@@ -34,7 +34,7 @@ require(
     			e.preventDefault();
 	            var $form = $(e.target),
 	            	bv = $form.data('bootstrapValidator'),
-	            	data = {login: 1, password: 1};
+	            	data = $form.serialize();
 	            
 	            $.ajax({
                     url: "./services/auth/login",
@@ -47,11 +47,18 @@ require(
                         //alert("success");
                         switch (data.status) {
                         case "SUCCESS" :
-                            window.location.replace("https://"+window.location.host+"<%=request.getContextPath() %>/secure/index.jsp");
+                            window.location.replace("./items/show");
                         	break;
                         case "NOTEXISTS":
                         	bv.updateStatus("login","INVALID","blank")
                     		bv.updateMessage("login","blank",data.errorMsg)
+                        	break;
+                        case "WRONGPASSWORD":
+                        	bv.updateStatus("password","INVALID","blank")
+                    		bv.updateMessage("password","blank",data.errorMsg)
+                        	break;
+                        case "EXCEPTION":
+                        	alert("error: " + data.errorMsg);
                         	break;
                         default:
                         	break;
