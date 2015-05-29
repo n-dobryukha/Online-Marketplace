@@ -37,7 +37,7 @@ require(
 	            	data = $form.serialize();
 	            
 	            $.ajax({
-                    url: "./services/auth/login",
+                    url: "./auth/login",
                     type: "POST",
                     data: data,
                     cache: false,

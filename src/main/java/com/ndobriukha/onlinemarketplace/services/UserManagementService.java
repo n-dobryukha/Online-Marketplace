@@ -24,7 +24,7 @@ import com.ndobriukha.onlinemarketplace.dao.oracle.OracleDaoFactory;
 import com.ndobriukha.onlinemarketplace.dao.oracle.OracleUserDao;
 import com.ndobriukha.onlinemarketplace.models.User;
 
-@Path("/auth")
+@Path("/")
 public class UserManagementService {
 
 	private static final String[] HEADERS_TO_TRY = { 

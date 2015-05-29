@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <title>Show Items</title>
-<link rel="stylesheet" href="css/default.css">
+<link rel="stylesheet" href="../css/default.css">
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
 <link rel="stylesheet" href="https://cdn.datatables.net/plug-ins/1.10.7/integration/bootstrap/3/dataTables.bootstrap.css">
 </head>
 <body>
-	<%@include file="/WEB-INF/jspf/header.jspf" %>
+	
 	<div class="container-fluid">
 		<fieldset>
 			<legend class="h4">Items</legend>
@@ -59,6 +59,6 @@
 			</table>
 		</fieldset>
 	</div>
-<script type="text/javascript" data-main="js/dataTabler" src="js/require.js"></script>
+<script type="text/javascript" data-main="../js/dataTabler" src="../js/require.js"></script>
 </body>
 </html>

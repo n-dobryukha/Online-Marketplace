@@ -29,7 +29,10 @@ require(
 				var table = $('#dataTable').DataTable({
 					'dom': 'lt<"row"<"col-sm-5"i><"col-sm-7 input-group-sm"p>>',
 					'searching' : true,
-					'ajax' : './ajax/data/data.json',
+					'ajax' : {
+						'url': './show/all',
+						'type': 'POST'
+					},
 					'columnDefs': [
 						{'targets':0, 'data' : 'uid'},
 						{'targets':1, 'data' : 'title'},

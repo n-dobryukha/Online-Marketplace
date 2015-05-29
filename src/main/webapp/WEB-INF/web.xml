@@ -10,26 +10,52 @@
 		<res-auth>Container</res-auth>
 	</resource-ref>
  
-	<filter>
+<!-- 	<filter>
 		<filter-name>AuthenticationFilter</filter-name>
 		<filter-class>com.ndobriukha.onlinemarketplace.filters.AuthenticationFilter</filter-class>
 	</filter>
 	<filter-mapping>
 		<filter-name>AuthenticationFilter</filter-name>
 		<url-pattern>/items/*</url-pattern>
-	</filter-mapping>
- 
+	</filter-mapping> -->
+	
 	<servlet>
-		<servlet-name>ServletAdaptor</servlet-name>
+		<servlet-name>ItemAdaptor</servlet-name>
 		<servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
 		<init-param>
 			<param-name>jersey.config.server.provider.packages</param-name>
 			<param-value>com.ndobriukha.onlinemarketplace.services</param-value>
 		</init-param>
-		<load-on-startup>2</load-on-startup>
+		<init-param>
+			<param-name>jersey.config.server.mvc.templateBasePath.jsp</param-name>
+			<param-value>/WEB-INF/jsp/</param-value>
+		</init-param>
+		<init-param>
+			<param-name>jersey.config.server.provider.classnames</param-name>
+			<param-value>org.glassfish.jersey.server.mvc.jsp.JspMvcFeature</param-value>
+		</init-param>
+		<init-param>
+			<param-name>jersey.config.servlet.filter.staticContentRegex</param-name>
+			<param-value>(/index.jsp)|(/(content|(WEB-INF/jsp))/.*)</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
 	</servlet>
 	<servlet-mapping>
-		<servlet-name>ServletAdaptor</servlet-name>
-		<url-pattern>/*</url-pattern>
+		<servlet-name>ItemAdaptor</servlet-name>
+		<url-pattern>/items/*</url-pattern>
 	</servlet-mapping>
+ 
+<!-- 	<servlet>
+		<servlet-name>LoginAdaptor</servlet-name>
+		<servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
+		<init-param>
+			<param-name>jersey.config.server.provider.packages</param-name>
+			<param-value>com.ndobriukha.onlinemarketplace.services</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>LoginAdaptor</servlet-name>
+		<url-pattern>/auth/*</url-pattern>
+	</servlet-mapping> -->
 </web-app>
