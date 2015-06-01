@@ -14,7 +14,23 @@ require.config({
 require(
 	['jquery', 'bootstrap', 'bootstrapValidator.min'],
 	function( $, bootstrap, bootstrapValidator ){
-    	
+		$.fn.serializeObject = function()
+		{
+		    var o = {};
+		    var a = this.serializeArray();
+		    $.each(a, function() {
+		        if (o[this.name] !== undefined) {
+		            if (!o[this.name].push) {
+		                o[this.name] = [o[this.name]];
+		            }
+		            o[this.name].push(this.value || '');
+		        } else {
+		            o[this.name] = this.value || '';
+		        }
+		    });
+		    return o;
+		};
+		
 		$(document).ready(function() {
     		$('#formLogin').bootstrapValidator({
     			fields: {
@@ -74,14 +90,12 @@ require(
                     }                    
                 });
     		});
-    		/*
-    		var bv = $('#formLogin').data("bootstrapValidator");
-    		;
-    		*/
+
     		$('#formRegistration').bootstrapValidator({
     			fields : {
     				login : {
     					validators: {
+    						blank: {},
     	                    stringLength: {
     	                        min: 6
     	                    },
@@ -97,6 +111,9 @@ require(
     				},
     				password : {
     					validators: {
+    						stringLength: {
+    	                        min: 6
+    	                    },
     	                    identical: {
     	                        field: 'confirmPassword',
     	                        message: 'The password and its confirm are not the same'
@@ -109,6 +126,9 @@ require(
     				},
     				confirmPassword: {
     	                validators: {
+    	                	stringLength: {
+    	                        min: 6
+    	                    },
     	                    identical: {
     	                        field: 'password',
     	                        message: 'The password and its confirm are not the same'
@@ -120,6 +140,53 @@ require(
     	                }
     	            }
     			}
+    		})
+    		.on('success.form.bv', function(e) {
+    			e.preventDefault();
+	            var $form = $(e.target),
+	            	bv = $form.data('bootstrapValidator'),
+	            	data = $form.serializeObject();
+	            
+	            $.ajax({
+                    url: "./auth/registration",
+                    type: "POST",
+                    data: JSON.stringify(data),
+                    cache: false,
+                    datatype: 'json',
+                    contentType: "application/json",
+                         
+                    success: function (data, textStatus, jqXHR){
+                        //alert("success");
+                        switch (data.status) {
+                        case "SUCCESS" :
+                            window.location.replace("./items/show");
+                        	break;
+                        case "WRONGPARAM":
+                        	var fieldErrors = data.fieldErrors;
+                        	for (var fieldName in data.fieldErrors) {
+                        		bv.updateStatus(fieldName,"INVALID",fieldErrors[fieldName]);
+                        	}
+                        	break;
+                        case "EXISTSLOGIN":
+                        	bv.updateStatus("login","INVALID","blank");
+                        	bv.updateMessage("login","blank",data.errorMsg);
+                        	break;
+                        case "EXCEPTION":
+                        	alert("error: " + data.errorMsg);
+                        	break;
+                        default:
+                        	break;
+                        }
+                    },
+                         
+                    error: function (jqXHR, textStatus, errorThrown){
+                        alert("error - HTTP STATUS: "+jqXHR.status);
+                    },
+                         
+                    complete: function(jqXHR, textStatus){
+                        //alert("complete");
+                    }                    
+                });
     		});
     		
     		$('#formEditItem')

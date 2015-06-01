@@ -19,7 +19,7 @@
 				<label for="login" class="col-sm-4 control-label">Login</label>
 				<div class="col-sm-4">
 					<input type="text" class="form-control" id="login" name="login"
-						placeholder="Login" autofocus="autofocus" required="required" data-bv-validator="blank">					
+						placeholder="Login" autofocus="autofocus" required="required">					
 				</div>
 			</div>
 			<div class="form-group">
@@ -33,8 +33,8 @@
 			<div class="form-group">
 				<div class="col-sm-offset-4 col-sm-8">
 					<button type="submit" class="btn btn-primary btn-sm">Sign in</button>
-					<a href="showitems.html" class="btn btn-success btn-sm" role="button">As guest</a>
-					<a href="registration.html" class="btn btn-info btn-sm" role="button">Registration</a>
+					<a href="./items/show" class="btn btn-success btn-sm" role="button">As guest</a>
+					<a href="registration.jsp" class="btn btn-info btn-sm" role="button">Registration</a>
 				</div>
 			</div>
 		</form>

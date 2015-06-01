@@ -19,11 +19,13 @@ public class User implements RetrieveFieldsValues, Identified {
 	}
 
 	public User(String fullName, String billingAddress, String login,
-			String password, String email) throws NoSuchAlgorithmException, InvalidKeySpecException {
+			String password, String email) {
 		this.fullName = fullName;
 		this.billingAddress = billingAddress;
 		this.login = login;
-		this.password = PasswordHash.createHash(password);
+		try {
+			this.password = PasswordHash.createHash(password);
+		} catch (NoSuchAlgorithmException | InvalidKeySpecException e) {}
 		this.email = email;
 	}
 

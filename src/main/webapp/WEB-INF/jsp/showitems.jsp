@@ -1,3 +1,4 @@
+<%-- <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %> --%>
 <!DOCTYPE html>
 <html>
 <head>
@@ -8,15 +9,18 @@
 <link rel="stylesheet" href="https://cdn.datatables.net/plug-ins/1.10.7/integration/bootstrap/3/dataTables.bootstrap.css">
 </head>
 <body>
-	
+	<%@include file="/WEB-INF/jspf/header.jspf" %>
 	<div class="container-fluid">
 		<fieldset>
 			<legend class="h4">Items</legend>
-			<p class="btn-group-xs">
-				<button type="button" class="btn btn-primary">Show All Items</button>
-				<button type="button" class="btn btn-primary">Show My Items</button>
-				<a href="edititem.html" type="button" class="btn btn-primary" role="button">Sell</a>
-			</p>			
+<%-- 			<c:set var="Role" scope="session" value="GUEST"/>
+			<c:if test="${ Role != GUEST }">
+				<p class="btn-group-xs">
+					<button type="button" class="btn btn-primary">Show All Items</button>
+					<button type="button" class="btn btn-primary">Show My Items</button>
+					<a href="edititem.html" type="button" class="btn btn-primary" role="button">Sell</a>
+				</p>
+			</c:if> --%>
 			<table id="dataTable" class="table table-striped table-bordered" width="100%">
 				<col class="colWidth5">
 				<col class="colWidth10">

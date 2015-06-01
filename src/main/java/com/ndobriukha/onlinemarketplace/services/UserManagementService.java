@@ -3,12 +3,19 @@ package com.ndobriukha.onlinemarketplace.services;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.naming.NamingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -19,10 +26,13 @@ import javax.ws.rs.core.Response;
 import org.apache.commons.dbutils.QueryRunner;
 
 import com.ndobriukha.onlinemarketplace.PasswordHash;
+import com.ndobriukha.onlinemarketplace.dao.PersistConstraintException;
 import com.ndobriukha.onlinemarketplace.dao.PersistExistsException;
 import com.ndobriukha.onlinemarketplace.dao.oracle.OracleDaoFactory;
 import com.ndobriukha.onlinemarketplace.dao.oracle.OracleUserDao;
 import com.ndobriukha.onlinemarketplace.models.User;
+import com.owlike.genson.Genson;
+import com.owlike.genson.GensonBuilder;
 
 @Path("/")
 public class UserManagementService {
@@ -43,14 +53,119 @@ public class UserManagementService {
 	private static String getClientIpAddress(HttpServletRequest request) {
 	    for (String header : HEADERS_TO_TRY) {
 	        String ip = request.getHeader(header);
-	        if (ip != null && ip.length() != 0 && !"unknown".equalsIgnoreCase(ip) && !"0:0:0:0:0:0:0:1".equalsIgnoreCase(ip)) {
+	        if (ip != null && ip.length() != 0 && !"unknown".equalsIgnoreCase(ip)) {
 	        	return ip;
 	        }
 	    }
 	    return request.getRemoteAddr();
 	}
 	
-	// This method is called if TEXT_PLAIN is request
+	@POST
+	@Path("registration")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response registration(String formData,
+			@Context HttpServletRequest req,
+			@Context HttpServletResponse res) {
+		JsonResponse jsonResp = new JsonResponse();
+		Genson genson = new Genson();
+		Map<String, Object> data = genson.deserialize(formData, Map.class);
+		Map<String, Object> fieldErrors = new HashMap<String, Object>();		
+		if (!checkRegistrationParams(data, fieldErrors)) {
+			jsonResp.setStatus("WRONGPARAM");
+			jsonResp.setFieldErrors(fieldErrors);
+		}
+		User user = new User((String) data.get("fullName"), (String) data.get("billingAddress"), (String) data.get("login"),
+				(String) data.get("password"), (String) data.get("email"));
+		HttpSession session = req.getSession(true);
+		try {
+			OracleDaoFactory oraFactory = (OracleDaoFactory) session.getAttribute("daoFactory");
+			OracleUserDao oraUserDao = (OracleUserDao) oraFactory.getDao(oraFactory.getContext(), User.class);
+			oraUserDao.save(user);
+			
+			QueryRunner runner = new QueryRunner(oraFactory.getContext());
+			String sql = "INSERT INTO SESSIONS (ID, USER_ID, IP_ADDRESS) VALUES(?,?,?)";
+			String ip = getClientIpAddress(req);
+			
+			session.setAttribute("User", user);
+			session.setAttribute("IP", ip);
+			runner.update(sql, session.getId(), user.getId(), ip);			
+		} catch (PersistConstraintException e) {
+			jsonResp.setStatus("EXISTSLOGIN");
+			jsonResp.setErrorMsg("Login already exists.");
+			return Response.ok().entity(jsonResp).build();
+		} catch (SQLException e) {
+			jsonResp.setStatus("EXCEPTION");
+			jsonResp.setErrorMsg(e.getMessage());
+            return Response.ok().entity(jsonResp).build();
+		}
+		jsonResp.setStatus("SUCCESS");
+		return Response.ok().entity(jsonResp).build();
+	}
+	
+	private boolean checkRegistrationParams(Map<String, Object> params, Map<String, Object> errors) {
+		for (Entry<String,Object> entry: params.entrySet()) {
+			String field = entry.getKey();
+			Object value = entry.getValue();			
+			switch (field) {
+				default:
+					if (value == null) {
+						errors.put(field, "notEmpty");
+					}
+					break;
+				case "login":
+					if (value.toString().length() < 6) {
+						errors.put(field, "stringLength");
+					}
+					if (!checkLoginRegexp((String) value)) {
+						errors.put(field, "regexp");
+					}
+					if (value.equals(params.get("password"))) {
+						errors.put(field, "different");
+						errors.put("password", "different");
+					}
+					if (value.equals(params.get("confirnPassword"))) {
+						errors.put(field, "different");
+						errors.put("confirmPassword", "different");
+					}
+					break;
+				case "password":
+					if (value.toString().length() < 6) {
+						errors.put(field, "stringLength");
+					}
+					if (value.equals(params.get("login"))) {
+						errors.put(field, "different");
+						errors.put("login", "different");
+					}
+					if (!value.equals(params.get("confirmPassword"))) {
+						errors.put(field, "identical");
+						errors.put("confirmPassword", "identical");
+					}
+					break;
+				case "confirmPassword":
+					if (value.toString().length() < 6) {
+						errors.put(field, "stringLength");
+					}
+					if (value.equals(params.get("login"))) {
+						errors.put(field, "different");
+						errors.put("login", "different");
+					}
+					if (!value.equals(params.get("password"))) {
+						errors.put(field, "identical");
+						errors.put("password", "identical");
+					}
+					break;
+			}
+		}
+		return (errors.size() == 0);
+	}
+	
+	private boolean checkLoginRegexp(String loginString) {
+		Pattern p = Pattern.compile("^[a-zA-Z0-9_.]+$");
+		Matcher m = p.matcher(loginString);
+		return m.matches();
+	}
+	
 	@POST
 	@Path("login")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -59,9 +174,10 @@ public class UserManagementService {
 			@Context HttpServletRequest req,
 			@Context HttpServletResponse res) throws URISyntaxException, IOException {
 		JsonResponse json = new JsonResponse();
+		HttpSession session = req.getSession(true);
 		try {
-			OracleDaoFactory oraFactory = new OracleDaoFactory(
-					"java:/comp/env/jdbc/marketplace");
+			OracleDaoFactory oraFactory = (OracleDaoFactory) session.getAttribute("daoFactory");
+			System.out.println(oraFactory);
 			OracleUserDao oraUserDao = (OracleUserDao) oraFactory.getDao(oraFactory.getContext(), User.class);
 			try {
 				User user = oraUserDao.getUserByLogin(login);
@@ -74,11 +190,10 @@ public class UserManagementService {
 					QueryRunner runner = new QueryRunner(oraFactory.getContext());
 					String sql = "INSERT INTO SESSIONS (ID, USER_ID, IP_ADDRESS) VALUES(?,?,?)";
 					String ip = getClientIpAddress(req);
-					HttpSession session = req.getSession(true);
 					session.setAttribute("User", user);
+					session.setAttribute("Role", "USER");
 					session.setAttribute("IP", ip);
 					runner.update(sql, session.getId(), user.getId(), ip);
-					//res.sendRedirect("../../../WEB-INF/showitems.jsp");
 				}
 			} catch(PersistExistsException e) {
 				json.setStatus("NOTEXISTS");
@@ -89,12 +204,44 @@ public class UserManagementService {
 				json.setErrorMsg(e.getMessage());
                 return Response.ok().entity(json).build();
 			}
-		} catch (NamingException | SQLException e) {
+		} catch (SQLException e) {
 			
 			e.printStackTrace();
 		}
 		json.setStatus("SUCCESS");
 		return Response.ok().entity(json).build();		
 	}
-
+	
+	@GET
+	@Path("guest")
+	public Response guest(@Context HttpServletRequest req,
+			@Context HttpServletResponse res) throws IOException {
+		HttpSession session = req.getSession(true);
+		try {
+			OracleDaoFactory oraFactory = (OracleDaoFactory) session.getAttribute("daoFactory");
+			QueryRunner runner = new QueryRunner(oraFactory.getContext());
+			String sql = "INSERT INTO SESSIONS (ID, USER_ID, IP_ADDRESS) VALUES(?,?,?)";
+			String ip = getClientIpAddress(req);		
+			session.setAttribute("User", new User("Guest", null, null, "", null));
+			session.setAttribute("Role", "GUEST");
+			session.setAttribute("IP", ip);
+			runner.update(sql, session.getId(), null, ip);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		res.sendRedirect("../items/show");
+		return Response.ok().build();
+	}
+	
+	@GET
+	@Path("logout")
+	public Response logout(@Context HttpServletRequest req,
+			@Context HttpServletResponse res) throws NamingException, SQLException, IOException {
+		HttpSession session = req.getSession(false);
+		if (session != null) {
+			session.invalidate();
+		}
+		res.sendRedirect("../login.jsp");
+		return Response.ok().build();
+	}
 }
