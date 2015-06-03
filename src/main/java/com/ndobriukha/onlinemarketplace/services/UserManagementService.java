@@ -174,6 +174,7 @@ public class UserManagementService {
 			@Context HttpServletRequest req,
 			@Context HttpServletResponse res) throws URISyntaxException, IOException {
 		JsonResponse json = new JsonResponse();
+		//req.getSession(false).invalidate();
 		HttpSession session = req.getSession(true);
 		try {
 			OracleDaoFactory oraFactory = (OracleDaoFactory) session.getAttribute("daoFactory");
@@ -216,6 +217,7 @@ public class UserManagementService {
 	@Path("guest")
 	public Response guest(@Context HttpServletRequest req,
 			@Context HttpServletResponse res) throws IOException {
+		//req.getSession(false).invalidate();
 		HttpSession session = req.getSession(true);
 		try {
 			OracleDaoFactory oraFactory = (OracleDaoFactory) session.getAttribute("daoFactory");

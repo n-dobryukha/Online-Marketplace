@@ -3,11 +3,12 @@
  */
 require.config({
 	paths: {
-        'jquery': '//ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min',
+        'jquery': 'https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min',
         'bootstrap': 'https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min'
     },
     shim: {
-    	'bootstrapValidator.min': ['jquery']
+    	'bootstrapValidator.min': ['jquery'],
+    	'bootstrap': ['jquery']
     }
 });
 
