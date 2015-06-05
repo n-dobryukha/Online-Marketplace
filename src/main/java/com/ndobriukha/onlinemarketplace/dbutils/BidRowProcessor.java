@@ -14,9 +14,10 @@ public class BidRowProcessor extends BasicRowProcessor {
 	public <T> T toBean(ResultSet rs, Class<T> type) throws SQLException {
 		Bid bid = new Bid();
 		bid.setId(rs.getInt(1));
-		bid.setBidderId(rs.getInt(2));
-		bid.setItemId(rs.getInt(3));
+		bid.setItemId(rs.getInt(2));
+		bid.setBidderId(rs.getInt(3));		
 		bid.setAmount(rs.getDouble(4));
+		bid.setTimestamp(rs.getTimestamp(5));
 		return (T) bid;
 	}
 

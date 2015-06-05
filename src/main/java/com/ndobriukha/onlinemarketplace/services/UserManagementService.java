@@ -3,6 +3,8 @@ package com.ndobriukha.onlinemarketplace.services;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -32,10 +34,20 @@ import com.ndobriukha.onlinemarketplace.dao.oracle.OracleDaoFactory;
 import com.ndobriukha.onlinemarketplace.dao.oracle.OracleUserDao;
 import com.ndobriukha.onlinemarketplace.models.User;
 import com.owlike.genson.Genson;
-import com.owlike.genson.GensonBuilder;
 
 @Path("/")
 public class UserManagementService {
+	
+	private OracleDaoFactory oraFactory;
+	
+	public UserManagementService() {
+		try {
+			oraFactory = new OracleDaoFactory("java:/comp/env/jdbc/marketplace");
+			System.out.println(new Timestamp((new Date()).getTime()) + ": UserManagement oraFactory created");
+		} catch (NamingException e) {
+			e.printStackTrace(System.err);
+		}
+	}
 
 	private static final String[] HEADERS_TO_TRY = { 
 	    "X-Forwarded-For",
@@ -69,6 +81,7 @@ public class UserManagementService {
 			@Context HttpServletResponse res) {
 		JsonResponse jsonResp = new JsonResponse();
 		Genson genson = new Genson();
+		@SuppressWarnings("unchecked")
 		Map<String, Object> data = genson.deserialize(formData, Map.class);
 		Map<String, Object> fieldErrors = new HashMap<String, Object>();		
 		if (!checkRegistrationParams(data, fieldErrors)) {
@@ -79,7 +92,6 @@ public class UserManagementService {
 				(String) data.get("password"), (String) data.get("email"));
 		HttpSession session = req.getSession(true);
 		try {
-			OracleDaoFactory oraFactory = (OracleDaoFactory) session.getAttribute("daoFactory");
 			OracleUserDao oraUserDao = (OracleUserDao) oraFactory.getDao(oraFactory.getContext(), User.class);
 			oraUserDao.save(user);
 			
@@ -174,11 +186,8 @@ public class UserManagementService {
 			@Context HttpServletRequest req,
 			@Context HttpServletResponse res) throws URISyntaxException, IOException {
 		JsonResponse json = new JsonResponse();
-		//req.getSession(false).invalidate();
 		HttpSession session = req.getSession(true);
 		try {
-			OracleDaoFactory oraFactory = (OracleDaoFactory) session.getAttribute("daoFactory");
-			System.out.println(oraFactory);
 			OracleUserDao oraUserDao = (OracleUserDao) oraFactory.getDao(oraFactory.getContext(), User.class);
 			try {
 				User user = oraUserDao.getUserByLogin(login);
@@ -217,10 +226,8 @@ public class UserManagementService {
 	@Path("guest")
 	public Response guest(@Context HttpServletRequest req,
 			@Context HttpServletResponse res) throws IOException {
-		//req.getSession(false).invalidate();
 		HttpSession session = req.getSession(true);
 		try {
-			OracleDaoFactory oraFactory = (OracleDaoFactory) session.getAttribute("daoFactory");
 			QueryRunner runner = new QueryRunner(oraFactory.getContext());
 			String sql = "INSERT INTO SESSIONS (ID, USER_ID, IP_ADDRESS) VALUES(?,?,?)";
 			String ip = getClientIpAddress(req);		
@@ -229,7 +236,7 @@ public class UserManagementService {
 			session.setAttribute("IP", ip);
 			runner.update(sql, session.getId(), null, ip);
 		} catch (SQLException e) {
-			e.printStackTrace();
+			e.printStackTrace(System.err);
 		}
 		res.sendRedirect("../items/show");
 		return Response.ok().build();

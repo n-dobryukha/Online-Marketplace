@@ -89,7 +89,7 @@ public class Item implements RetrieveFieldsValues, Identified {
 		this.timeLeft = timeLeft;
 	}
 
-	public Date getStartBidding() {
+	public Timestamp getStartBidding() {
 		return startBidding;
 	}
 

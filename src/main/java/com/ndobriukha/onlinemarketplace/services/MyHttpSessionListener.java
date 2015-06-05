@@ -17,16 +17,7 @@ public class MyHttpSessionListener implements HttpSessionListener {
 	
 	@Override
 	public void sessionCreated(HttpSessionEvent se) {
-		HttpSession session = se.getSession();
-		System.out.println(new Timestamp((new Date()).getTime()) + ": Session " + session.getId() + " created");
-		session.setMaxInactiveInterval(15*60);
-		try {
-			OracleDaoFactory daoFactory = new OracleDaoFactory(
-					"java:/comp/env/jdbc/marketplace");
-			session.setAttribute("daoFactory", daoFactory);
-		} catch (NamingException e) {
-			e.printStackTrace();
-		}		
+		System.out.println(new Timestamp((new Date()).getTime()) + ": Session " + se.getSession().getId() + " created");				
 	}
 
 	@Override
@@ -35,13 +26,12 @@ public class MyHttpSessionListener implements HttpSessionListener {
 		System.out.println(new Timestamp((new Date()).getTime()) + ": Session " + session.getId() + " destroyed");
 		if (session.getAttribute("IP") != null) {
 			try {
-				QueryRunner runner = new QueryRunner(
-						((OracleDaoFactory) session.getAttribute("daoFactory"))
-								.getContext());
+				OracleDaoFactory oraFactory = new OracleDaoFactory("java:/comp/env/jdbc/marketplace");
+				QueryRunner runner = new QueryRunner(oraFactory.getContext());
 				String sql = "UPDATE SESSIONS SET END_TS = SYSDATE WHERE ID = ?";
 				runner.update(sql, session.getId());
-			} catch (SQLException e) {
-				e.printStackTrace();
+			} catch (NamingException | SQLException e) {
+				e.printStackTrace(System.err);
 			}
 		}
 	}

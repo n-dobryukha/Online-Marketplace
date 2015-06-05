@@ -82,9 +82,10 @@ public class OracleBidDaoTest {
 			OracleBidDao oraBidDao = (OracleBidDao) oraFactory.getDao(dataSource, Bid.class);
 			String sql = oraBidDao.getCreateQuery();
 			Integer itemId = items.get(0).getId();
-			Object[][] params = { { users.get(0).getId(), itemId, 100.00 },
-					{ users.get(1).getId(), itemId, 150.00 },
-					{ users.get(2).getId(), itemId, 200.00 }, };
+			Timestamp ts = new Timestamp(new Date().getTime());
+			Object[][] params = { { itemId, users.get(0).getId(), 100.00, ts },
+					{ itemId, users.get(1).getId(), 150.00, ts },
+					{ itemId, users.get(2).getId(), 200.00, ts }, };
 			runner.batch(sql, params);
 
 			List<Bid> bids = oraBidDao.getBidsByItemId(itemId);
@@ -115,7 +116,7 @@ public class OracleBidDaoTest {
 		try {
 			OracleBidDao oraBidDao = (OracleBidDao) oraFactory.getDao(dataSource, Bid.class);
 			Bid bid = new Bid(users.get(0).getId(), items.get(0)
-					.getId(), 100.00);
+					.getId(), 100.00, new Timestamp(new Date().getTime()));
 			oraBidDao.save(bid);
 			Assert.assertNotNull("Persist object is null", bid);
 			Assert.assertNotNull("After persist object ID is null", bid.getId());
@@ -146,9 +147,10 @@ public class OracleBidDaoTest {
 			OracleBidDao oraBidDao = (OracleBidDao) oraFactory.getDao(dataSource, Bid.class);
 			String sql = oraBidDao.getCreateQuery();
 			Integer itemId = items.get(0).getId();
-			Object[][] params = { { users.get(0).getId(), itemId, 100.00 },
-					{ users.get(1).getId(), itemId, 150.00 },
-					{ users.get(2).getId(), itemId, 200.00 }, };
+			Timestamp ts = new Timestamp(new Date().getTime());
+			Object[][] params = { { itemId, users.get(0).getId(), 100.00, ts },
+					{ itemId, users.get(1).getId(), 150.00, ts },
+					{ itemId, users.get(2).getId(), 200.00, ts }, };
 			runner.batch(sql, params);
 
 			Bid bestBid = oraBidDao.getBestBidByItemId(itemId);

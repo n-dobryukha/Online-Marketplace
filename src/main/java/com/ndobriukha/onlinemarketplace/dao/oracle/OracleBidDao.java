@@ -27,7 +27,7 @@ public class OracleBidDao extends CommonDao<Bid> {
 
 	@Override
 	public String[] getColumnsName() {
-		return new String[] { "ID", "BIDDER_ID", "ITEM_ID", "AMOUNT" };
+		return new String[] { "ID", "ITEM_ID", "BIDDER_ID", "AMOUNT", "TS" };
 	}
 	
 	/**

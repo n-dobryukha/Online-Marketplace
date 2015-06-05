@@ -1,21 +1,25 @@
 package com.ndobriukha.onlinemarketplace.models;
 
+import java.sql.Timestamp;
+
 import com.ndobriukha.onlinemarketplace.dao.Identified;
 
 public class Bid implements RetrieveFieldsValues, Identified {
 
 	private Integer id = null;
-	private Integer bidderId;
-	private Integer itemId;	
+	private Integer itemId;
+	private Integer bidderId;	
 	private double amount;
+	private Timestamp timestamp;
 	
 	public Bid() {
 	}	
 
-	public Bid(Integer bidderId, Integer itemId, double amount) {
+	public Bid(Integer bidderId, Integer itemId, double amount, Timestamp timestamp) {
 		this.bidderId = bidderId;
 		this.itemId = itemId;
 		this.amount = amount;
+		this.timestamp = timestamp;
 	}
 
 	@Override	
@@ -27,20 +31,20 @@ public class Bid implements RetrieveFieldsValues, Identified {
 		this.id = id;
 	}
 
-	public Integer getBidderId() {
-		return bidderId;
-	}
-
-	public void setBidderId(Integer bidderId) {
-		this.bidderId = bidderId;
-	}
-
 	public Integer getItemId() {
 		return itemId;
 	}
 
 	public void setItemId(Integer itemId) {
 		this.itemId = itemId;
+	}
+	
+	public Integer getBidderId() {
+		return bidderId;
+	}
+
+	public void setBidderId(Integer bidderId) {
+		this.bidderId = bidderId;
 	}
 
 	public double getAmount() {
@@ -51,9 +55,17 @@ public class Bid implements RetrieveFieldsValues, Identified {
 		this.amount = amount;
 	}
 
+	public Timestamp getTimestamp() {
+		return timestamp;
+	}
+
+	public void setTimestamp(Timestamp timestamp) {
+		this.timestamp = timestamp;
+	}
+
 	@Override
 	public Object[] getFieldsValues() {
-		return new Object[] { getBidderId(), getItemId(), getAmount() };
+		return new Object[] { getItemId(), getBidderId(), getAmount(), getTimestamp() };
 	}
 
 	@Override
@@ -67,6 +79,8 @@ public class Bid implements RetrieveFieldsValues, Identified {
 				+ ((bidderId == null) ? 0 : bidderId.hashCode());
 		result = prime * result + ((id == null) ? 0 : id.hashCode());
 		result = prime * result + ((itemId == null) ? 0 : itemId.hashCode());
+		result = prime * result
+				+ ((timestamp == null) ? 0 : timestamp.hashCode());
 		return result;
 	}
 
@@ -97,7 +111,12 @@ public class Bid implements RetrieveFieldsValues, Identified {
 				return false;
 		} else if (!itemId.equals(other.itemId))
 			return false;
+		if (timestamp == null) {
+			if (other.timestamp != null)
+				return false;
+		} else if (!timestamp.equals(other.timestamp))
+			return false;
 		return true;
-	}
+	}	
 	
 }
