@@ -38,7 +38,7 @@ public class OracleBidDao extends CommonDao<Bid> {
 	 * @throws PersistException
 	 */
 	public List<Bid> getBidsByItemId(int itemId) throws PersistExistsException, PersistException {
-		String sql = getSelectQuery() + " WHERE ITEM_ID = ?";
+		String sql = getSelectQuery() + " WHERE ITEM_ID = ? ORDER BY ID DESC";
 		QueryRunner query = new QueryRunner(dataSource);
 		BeanListHandler<Bid> beanListHandler = new BeanListHandler<Bid>(Bid.class, convert);
 		List<Bid> result = null;

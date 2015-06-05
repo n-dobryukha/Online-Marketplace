@@ -14,6 +14,8 @@ import java.util.Map;
 import javax.naming.NamingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -21,6 +23,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import org.glassfish.jersey.server.mvc.Viewable;
 
@@ -55,6 +58,90 @@ public class ItemManagementService {
 		return new Viewable("/showitems");
 	}
 	
+	@SuppressWarnings("serial")
+	private Map<String, Object> getEmptyItemData() {
+		Map<String, Object> result = new HashMap<String, Object>();		
+		result.put("uid", "");
+		result.put("title", "");
+		result.put("description", "");
+		result.put("seller", new HashMap<String, Object>() {{ put("id",""); put("name", ""); }});
+		result.put("startPrice", "");
+		result.put("bidInc", "");
+		result.put("bestOffer", "");
+		result.put("bidder", new HashMap<String, Object>() {{ put("id",""); put("name", ""); }});
+		result.put("stopDate", new HashMap<String, Object>() {{ put("display",""); put("timestamp", ""); }});
+		result.put("action", "");
+		return result;
+	}
+
+	private Map<String, Object> buildItemData(Item item) {
+		Map<String, Object> data = getEmptyItemData();
+		NumberFormat numberFormatter = new DecimalFormat("#0.00");
+		try {
+			OracleBidDao oraBidDao = (OracleBidDao) oraFactory.getDao(oraFactory.getContext(), Bid.class);
+			OracleUserDao oraUserDao = (OracleUserDao) oraFactory.getDao(oraFactory.getContext(), User.class);
+
+			Map<String, Object> sellerData = new HashMap<String, Object>();
+			User seller = oraUserDao.get(item.getSellerId());
+			sellerData.put("id", seller.getId());
+			sellerData.put("name", seller.getFullName());
+						
+			Bid bid = oraBidDao.getBestBidByItemId(item.getId());
+			if (bid != null) {
+				User bidder = oraUserDao.get(bid.getBidderId());
+				if (bidder != null) {
+					Map<String, Object> bidderData = new HashMap<String, Object>();
+					bidderData.put("id", bidder.getId());
+					bidderData.put("name", bidder.getFullName());
+					data.put("bidder", bidderData);
+				}			
+			}
+			Map<String, Object> dateData = new HashMap<String, Object>();
+			Calendar cal = Calendar.getInstance();
+			cal.setTime(item.getStartBidding());
+			cal.add(Calendar.HOUR, item.getTimeLeft());
+			
+			dateData.put("display", (new SimpleDateFormat("yyyy-MM-dd_hh:mm:ss").format(cal.getTime())));
+			dateData.put("timestamp", cal.getTime());
+			
+			data.put("uid", item.getId());
+			data.put("title", item.getTitle());
+			data.put("description", item.getDescription());				
+			data.put("seller", sellerData);
+			data.put("startPrice", numberFormatter.format(item.getStartPrice()));
+			data.put("bidInc", (!item.isBuyItNow()) ? numberFormatter.format(item.getBidIncrement()) : "");
+			data.put("bestOffer", (bid != null) ? numberFormatter.format(bid.getAmount()) : "");
+			data.put("stopDate", dateData);
+			if (cal.before(Calendar.getInstance())) {
+				data.put("action", "");
+			} else {
+				data.put("action", (item.isBuyItNow()) ? "buy" : "bid");
+			}
+			
+		} catch (PersistException e) {
+			e.printStackTrace(System.err);
+		}
+		return data;		
+	}
+	
+	@GET
+	@Path("/item/{id}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public String getItemData(@PathParam("id") int id) {
+		Map<String, Object> data = getEmptyItemData();		
+		try {
+			OracleItemDao oraItemDao = (OracleItemDao) oraFactory.getDao(oraFactory.getContext(), Item.class);
+			Item item = oraItemDao.get(id);
+			if (item != null) {
+				data = buildItemData(item);
+			}
+		} catch (PersistException e) {
+			e.printStackTrace(System.err);
+		}
+		Genson genson = new Genson();		
+		return genson.serialize(data);
+	}
+	
 	@SuppressWarnings("rawtypes")
 	@POST
 	@Path("/show/all")
@@ -62,55 +149,12 @@ public class ItemManagementService {
 	public String getAll(@Context HttpServletRequest req,
 			@Context HttpServletResponse res) {
 		final List<Map<String, Object>> data = new ArrayList<Map<String,Object>>();
-		NumberFormat numberFormatter = new DecimalFormat("#0.00");
 		try {
-			OracleBidDao oraBidDao = (OracleBidDao) oraFactory.getDao(oraFactory.getContext(), Bid.class);
 			OracleItemDao oraItemDao = (OracleItemDao) oraFactory.getDao(oraFactory.getContext(), Item.class);
-			OracleUserDao oraUserDao = (OracleUserDao) oraFactory.getDao(oraFactory.getContext(), User.class);			
 			List<Item> items = oraItemDao.getAll();
 			for (Item item: items) {
-				int sellerId = item.getSellerId();
-				User seller = oraUserDao.get(sellerId);
-				Map<String, Object> sellerData = new HashMap<String, Object>();
-				sellerData.put("id", seller.getId());
-				sellerData.put("name", seller.getFullName());
-				
-				Map<String, Object> bidderData = new HashMap<String, Object>();
-				bidderData.put("id", "");
-				bidderData.put("name", "");
-				Bid bid = oraBidDao.getBestBidByItemId(item.getId());
-				if (bid != null) {
-					User bidder = oraUserDao.get(bid.getBidderId());
-					if (bidder != null) {
-						bidderData.put("id", bidder.getId());
-						bidderData.put("name", bidder.getFullName());
-					}			
-				}
-				Map<String, Object> dateData = new HashMap<String, Object>();
-				Calendar cal = Calendar.getInstance();
-				cal.setTime(item.getStartBidding());
-				cal.add(Calendar.HOUR, item.getTimeLeft());
-				
-				dateData.put("display", (new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(cal.getTime())));
-				dateData.put("timestamp", cal.getTime());
-				
-				Map<String, Object> dataItem = new HashMap<String, Object>();
-				dataItem.put("uid", item.getId());
-				dataItem.put("title", item.getTitle());
-				dataItem.put("description", item.getDescription());				
-				dataItem.put("seller", sellerData);
-				dataItem.put("startPrice", numberFormatter.format(item.getStartPrice()));
-				dataItem.put("bidInc", (!item.isBuyItNow()) ? numberFormatter.format(item.getBidIncrement()) : "");
-				dataItem.put("bestOffer", (bid != null) ? numberFormatter.format(bid.getAmount()) : "");
-				dataItem.put("bidder", bidderData);
-				dataItem.put("stopDate", dateData);
-				if ("USER".equals(req.getSession().getAttribute("Role"))) {
-					if (cal.before(Calendar.getInstance())) {
-						dataItem.put("action", "");
-					} else {
-						dataItem.put("action", (item.isBuyItNow()) ? "buy" : "bid");
-					}
-				} else {
+				Map<String, Object> dataItem = buildItemData(item);
+				if (!"USER".equals(req.getSession().getAttribute("Role"))) {
 					dataItem.put("action", "");
 				}
 				data.add(dataItem);
@@ -124,6 +168,36 @@ public class ItemManagementService {
 		results.put("data", data);
 		Genson genson = new Genson();		
 		return genson.serialize(results);		
+	}
+	
+	@POST
+	@Path("/bid/{id}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response bid(@PathParam("id") int id, @FormParam("bidValue") String value,
+			@Context HttpServletRequest req,
+			@Context HttpServletResponse res) {
+		JsonResponse jsonResp = new JsonResponse();
+		HttpSession session = req.getSession();
+		if ("GUEST".equals(session.getAttribute("Role"))) {
+			jsonResp.setStatus("WRONGROLE");
+			jsonResp.setErrorMsg("Wrong role");
+            return Response.ok().entity(jsonResp).build();
+		}
+		try {
+			User bidder = (User) session.getAttribute("User");
+			Bid bid = new Bid(bidder.getId(), id, Double.parseDouble(value), new Timestamp(new Date().getTime()));
+			OracleBidDao oraBidDao = (OracleBidDao) oraFactory.getDao(oraFactory.getContext(), Bid.class);
+			oraBidDao.save(bid);
+			OracleItemDao oraItemDao = (OracleItemDao) oraFactory.getDao(oraFactory.getContext(), Item.class);
+			Item item = oraItemDao.get(id);
+			Map<String, Object> data = buildItemData(item);
+			Genson genson = new Genson();
+			jsonResp.setData(genson.serialize(data));			
+			
+		} catch (PersistException e) {
+			e.printStackTrace(System.err);
+		}
+		return Response.ok().entity(jsonResp).build();
 	}
 	
 	@POST
@@ -151,8 +225,8 @@ public class ItemManagementService {
 				dataItem.put("amount", numberFormatter.format(bid.getAmount()));
 				
 				Map<String, Object> dateData = new HashMap<String, Object>();
-				dateData.put("display", (new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(bid.getTimestamp())));
-				dateData.put("timestamp", bid.getTimestamp().getTime());				
+				dateData.put("display", (new SimpleDateFormat("yyyy-MM-dd_hh:mm:ss").format(bid.getTimestamp())));
+				dateData.put("timestamp", Long.toString(bid.getTimestamp().getTime()));				
 				dataItem.put("ts", dateData);
 				
 				data.add(dataItem);
@@ -162,7 +236,8 @@ public class ItemManagementService {
 		}
 		Map<String, List> results = new HashMap<String, List>();
 		results.put("data", data);
-		Genson genson = new Genson();		
+		Genson genson = new Genson();
+		System.out.print(genson.serialize(results));
 		return genson.serialize(results);
-	}
+	}	
 }

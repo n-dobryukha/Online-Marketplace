@@ -66,10 +66,10 @@ require(
 								switch (data) {
 								case 'bid':
 									var minValue = ((row.bestOffer === "") ? row.startPrice : (parseFloat(row.bestOffer) + parseFloat(row.bidInc)).toFixed(2));
-									return "<form method='post' id='form_" + row.uid + "'><div class='form-group'><div class='input-group input-group-xs'><div class='input-group-addon'>$</div><input type='text' id='bidValue_" + row.uid + "' name='bidValue' class='form-control' placeholder='" + minValue + "' min='" + minValue + "' required='required'><span class='input-group-btn'><button class='btn btn-default' type='submit'>Bid</button></span></div></div></form>";
+									return "<form method='post' data-item-id='" + row.uid + "'><div class='form-group'><div class='input-group input-group-xs'><div class='input-group-addon'>$</div><input type='text' name='bidValue' class='form-control' placeholder='" + minValue + "' min='" + minValue + "' required='required'><span class='input-group-btn'><button class='btn btn-default' type='submit'>Bid</button></span></div></div></form>";
 									break;
 								case 'buy':
-									return "<form method='post' id='form_" + row.uid + "'><input type='hidden' name='bidValue' value='" + row.startPrice + "'><div class='btn-group btn-group-justified'><div class='btn-group' role='group'><button class='btn btn-default btn-xs' type='submit'>Buy</button></div></div></form>"
+									return "<form method='post' data-item-id='" + row.uid + "'><input type='hidden' name='bidValue' value='" + row.startPrice + "'><div class='btn-group btn-group-justified'><div class='btn-group' role='group'><button class='btn btn-default btn-xs' type='submit'>Buy</button></div></div></form>"
 								default:
 									return "";
 								}								
@@ -94,31 +94,37 @@ require(
 						.on('success.form.bv', function(e) {
 			    			e.preventDefault();
 				            var $form = $(e.target),
+				            	itemId = $form.data('item-id'),
+				            	value = $form.find('input[name="bidValue"]').val();
 				            	bv = $form.data('bootstrapValidator'),
 				            	data = $form.serialize();
 				            
+				            if (!confirm('Are you sure?')) {
+				            	$form.find('button[type="submit"]').prop('disabled', false);
+				            	return;
+				            }
+				            	
 				            $.ajax({
-			                    url: "./bid/1",
+			                    url: "./bid/" + itemId,
 			                    type: "POST",
 			                    data: data,
 			                    cache: false,
 			                    datatype: 'json',
 			                         
 			                    success: function (data, textStatus, jqXHR){
-			                        alert("success");			                        
+			                    	table.row( $form.parent().parent() ).data( JSON.parse(data.data) ).draw();
 			                    },
 			                         
 			                    error: function (jqXHR, textStatus, errorThrown){
 			                        alert("error - HTTP STATUS: "+jqXHR.status);
 			                    },
 			                         
-			                    complete: function(jqXHR, textStatus){
-			                        alert("complete");
+			                    complete: function(jqXHR, textStatus){			                        
 			                    }                    
 			                });
 			    		});
 					})
-				} );				
+				});
 				
 				$('#bidListModal').on('show.bs.modal', function (event) {					
 					var itemId = $(event.relatedTarget).data('whatever');
@@ -134,15 +140,16 @@ require(
 								'url': './bids/' + itemId,
 								'type': 'POST'
 							},
-							'columnDefs': [
-								{'targets':0, 'data' : 'count'},
-								{'targets':1, 'data' : 'bidder.name'},
-								{'targets':2, 'data' : 'amount'},
-								{'targets':3, 'data' : { _: 'ts.display', 'sort': 'ts.timestamp' } },
+							'columns': [
+								{ data : 'count'},
+								{ data : 'bidder.name'},
+								{ data : 'amount'},
+								{ data : { _: 'ts.display', 'sort': 'ts.timestamp' } },
 							]
 						});
-					}					 	
+					}
 				})
+				
 			})
 		}
 );
