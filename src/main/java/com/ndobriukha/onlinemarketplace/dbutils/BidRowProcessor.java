@@ -10,6 +10,7 @@ import org.apache.commons.dbutils.BasicRowProcessor;
 import com.ndobriukha.onlinemarketplace.models.Bid;
 
 public class BidRowProcessor extends BasicRowProcessor {
+	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T toBean(ResultSet rs, Class<T> type) throws SQLException {
 		Bid bid = new Bid();
@@ -21,6 +22,7 @@ public class BidRowProcessor extends BasicRowProcessor {
 		return (T) bid;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public <T> List<T> toBeanList(ResultSet rs, Class<T> type)
 			throws SQLException {

@@ -16,14 +16,12 @@ import com.ndobriukha.onlinemarketplace.dao.oracle.OracleDaoFactory;
 public class MyHttpSessionListener implements HttpSessionListener {
 	
 	@Override
-	public void sessionCreated(HttpSessionEvent se) {
-		System.out.println(new Timestamp((new Date()).getTime()) + ": Session " + se.getSession().getId() + " created");				
+	public void sessionCreated(HttpSessionEvent se) {				
 	}
 
 	@Override
 	public void sessionDestroyed(HttpSessionEvent se) {
 		HttpSession session = se.getSession();
-		System.out.println(new Timestamp((new Date()).getTime()) + ": Session " + session.getId() + " destroyed");
 		if (session.getAttribute("IP") != null) {
 			try {
 				OracleDaoFactory oraFactory = new OracleDaoFactory("java:/comp/env/jdbc/marketplace");

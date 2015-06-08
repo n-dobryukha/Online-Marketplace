@@ -2,7 +2,7 @@
 	<div class="container-fluid">
 		<p class="navbar-text pull-right">
 			You are logged in as: <strong><%= ((com.ndobriukha.onlinemarketplace.models.User) session.getAttribute("User")).getFullName() %></strong> <a
-				href="../auth/logout" class="btn btn-default btn-sm" role="button">Logout</a>
+				href="<%=request.getContextPath()%>/auth/logout" class="btn btn-default btn-sm" role="button">Logout</a>
 		</p>
 	</div>
 </nav>

@@ -1,7 +1,6 @@
 package com.ndobriukha.onlinemarketplace.models;
 
 import java.sql.Timestamp;
-import java.util.Date;
 
 import com.ndobriukha.onlinemarketplace.dao.Identified;
 
@@ -123,6 +122,10 @@ public class Item implements RetrieveFieldsValues, Identified {
 
 	public void setSold(BooleanType sold) {
 		this.sold = sold;
+	}
+	
+	public boolean isSold() {
+		return (sold == BooleanType.Y);
 	}
 	
 	public void sale() {

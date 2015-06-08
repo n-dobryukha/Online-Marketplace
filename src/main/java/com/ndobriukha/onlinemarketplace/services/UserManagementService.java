@@ -38,12 +38,15 @@ import com.owlike.genson.Genson;
 @Path("/")
 public class UserManagementService {
 	
+	public static String USER_ROLE = "USER";
+	public static String GUEST_ROLE = "GUEST";
+	
 	private OracleDaoFactory oraFactory;
+	
 	
 	public UserManagementService() {
 		try {
 			oraFactory = new OracleDaoFactory("java:/comp/env/jdbc/marketplace");
-			System.out.println(new Timestamp((new Date()).getTime()) + ": UserManagement oraFactory created");
 		} catch (NamingException e) {
 			e.printStackTrace(System.err);
 		}
@@ -101,6 +104,7 @@ public class UserManagementService {
 			
 			session.setAttribute("User", user);
 			session.setAttribute("IP", ip);
+			session.setAttribute("Role", USER_ROLE);
 			runner.update(sql, session.getId(), user.getId(), ip);			
 		} catch (PersistConstraintException e) {
 			jsonResp.setStatus("EXISTSLOGIN");
@@ -201,7 +205,7 @@ public class UserManagementService {
 					String sql = "INSERT INTO SESSIONS (ID, USER_ID, IP_ADDRESS) VALUES(?,?,?)";
 					String ip = getClientIpAddress(req);
 					session.setAttribute("User", user);
-					session.setAttribute("Role", "USER");
+					session.setAttribute("Role", USER_ROLE);
 					session.setAttribute("IP", ip);
 					runner.update(sql, session.getId(), user.getId(), ip);
 				}
@@ -226,19 +230,21 @@ public class UserManagementService {
 	@Path("guest")
 	public Response guest(@Context HttpServletRequest req,
 			@Context HttpServletResponse res) throws IOException {
-		HttpSession session = req.getSession(true);
+		HttpSession session = req.getSession();
+		session.invalidate();
+		session = req.getSession(true);
 		try {
 			QueryRunner runner = new QueryRunner(oraFactory.getContext());
 			String sql = "INSERT INTO SESSIONS (ID, USER_ID, IP_ADDRESS) VALUES(?,?,?)";
 			String ip = getClientIpAddress(req);		
 			session.setAttribute("User", new User("Guest", null, null, "", null));
-			session.setAttribute("Role", "GUEST");
+			session.setAttribute("Role", GUEST_ROLE);
 			session.setAttribute("IP", ip);
 			runner.update(sql, session.getId(), null, ip);
 		} catch (SQLException e) {
 			e.printStackTrace(System.err);
 		}
-		res.sendRedirect("../items/show");
+		res.sendRedirect(req.getContextPath() + "/items/show/all");
 		return Response.ok().build();
 	}
 	
@@ -250,7 +256,7 @@ public class UserManagementService {
 		if (session != null) {
 			session.invalidate();
 		}
-		res.sendRedirect("../login.jsp");
+		res.sendRedirect(req.getContextPath() + "/login.jsp");
 		return Response.ok().build();
 	}
 }

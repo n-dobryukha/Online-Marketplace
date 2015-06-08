@@ -36,7 +36,7 @@ response.setCharacterEncoding("UTF-8");%>
 			<div class="form-group">
 				<div class="col-sm-offset-4 col-sm-8">
 					<button type="submit" class="btn btn-primary btn-sm">Sign in</button>
-					<a href="./items/show" class="btn btn-success btn-sm" role="button">As guest</a>
+					<a href="./auth/guest" class="btn btn-success btn-sm" role="button">As guest</a>
 					<a href="registration.jsp" class="btn btn-info btn-sm" role="button">Registration</a>
 				</div>
 			</div>

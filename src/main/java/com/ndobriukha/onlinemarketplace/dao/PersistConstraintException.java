@@ -1,5 +1,6 @@
 package com.ndobriukha.onlinemarketplace.dao;
 
+@SuppressWarnings("serial")
 public class PersistConstraintException extends PersistException {
 	public PersistConstraintException() { }
 	

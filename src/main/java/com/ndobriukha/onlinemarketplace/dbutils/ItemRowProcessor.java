@@ -12,6 +12,7 @@ import com.ndobriukha.onlinemarketplace.models.Item.BooleanType;
 
 public class ItemRowProcessor extends BasicRowProcessor {
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T toBean(ResultSet rs, Class<T> type) throws SQLException {
 		Item item = new Item();
@@ -28,6 +29,7 @@ public class ItemRowProcessor extends BasicRowProcessor {
 		return (T) item;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public <T> List<T> toBeanList(ResultSet rs, Class<T> type)
 			throws SQLException {

@@ -2,6 +2,7 @@ package com.ndobriukha.onlinemarketplace.dao;
 
 import java.sql.SQLException;
 
+@SuppressWarnings("serial")
 public class PersistException extends SQLException {
 
 	public PersistException() { }

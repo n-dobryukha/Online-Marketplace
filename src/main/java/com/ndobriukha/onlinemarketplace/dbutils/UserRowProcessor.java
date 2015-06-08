@@ -11,6 +11,7 @@ import com.ndobriukha.onlinemarketplace.models.User;
 
 public class UserRowProcessor extends BasicRowProcessor {
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T toBean(ResultSet rs, Class<T> type) throws SQLException {
 		User user = new User();
@@ -23,6 +24,7 @@ public class UserRowProcessor extends BasicRowProcessor {
 		return (T) user;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public <T> List<T> toBeanList(ResultSet rs, Class<T> type)
 			throws SQLException {

@@ -33,7 +33,7 @@ require(
 					'dom': 'lt<"row"<"col-sm-5"i><"col-sm-7 input-group-sm"p>>',
 					'searching' : true,
 					'ajax' : {
-						'url': './show/all',
+						'url': './' + $('#type').val().toLowerCase(),
 						'type': 'POST'
 					},
 					'columnDefs': [
@@ -70,8 +70,18 @@ require(
 									break;
 								case 'buy':
 									return "<form method='post' data-item-id='" + row.uid + "'><input type='hidden' name='bidValue' value='" + row.startPrice + "'><div class='btn-group btn-group-justified'><div class='btn-group' role='group'><button class='btn btn-default btn-xs' type='submit'>Buy</button></div></div></form>"
+								case 'edit':
+									return "<div class='btn-group btn-group-justified' role='group' aria-label='...'>" +
+												"<div class='btn-group btn-group-xs' role='group'>" +
+													"<button type='edit' class='btn btn-default' value='" + row.uid +"'>Edit&nbsp;<span class='glyphicon glyphicon-edit' aria-hidden='true'></span></button>" +
+												"</div>" +
+												"<div class='btn-group btn-group-xs' role='group'>" +
+													"<button type='delete' class='btn btn-default' value='" + row.uid +"'>Delete&nbsp;<span class='glyphicon glyphicon-trash' aria-hidden='true'></span></button>" +
+												"</div>"
+  											"</div>";
+									break;
 								default:
-									return "";
+									return "<div class='text-center'>" + data + "</div>";
 								}								
 							}
 						}]
@@ -105,14 +115,14 @@ require(
 				            }
 				            	
 				            $.ajax({
-			                    url: "./bid/" + itemId,
+			                    url: "../bid/" + itemId,
 			                    type: "POST",
 			                    data: data,
 			                    cache: false,
 			                    datatype: 'json',
 			                         
 			                    success: function (data, textStatus, jqXHR){
-			                    	table.row( $form.parent().parent() ).data( JSON.parse(data.data) ).draw();
+			                    	table.row( $form.closest('tr') ).data( JSON.parse(data.data) ).draw();
 			                    },
 			                         
 			                    error: function (jqXHR, textStatus, errorThrown){
@@ -124,6 +134,48 @@ require(
 			                });
 			    		});
 					})
+					$('#dataTable').find('button[type="edit"]').each(function() {
+						$(this).on('click', function() {
+							document.location.href = '../edit/' + this.value;
+						});
+					})
+					$('#dataTable').find('button[type="delete"]').each(function() {
+						$(this).on('click', function() {
+							var itemId = this.value,
+								row = $(this).closest('tr');
+
+							if (!confirm('Are you sure?')) {
+								return;
+							}
+							
+							$.ajax({
+			                    url: "../delete/" + itemId,
+			                    type: "DELETE",
+			                    cache: false,
+			                    datatype: 'json',
+
+			                    success: function (data, textStatus, jqXHR){
+			                    	switch (data.status) {
+			                        case "SUCCESS" :
+			                        	table.row( row ).remove().draw(false);
+			                        	break;
+			                        case "EXCEPTION":
+			                        	alert("error: " + data.errorMsg);
+			                        	break;
+			                        default:
+			                        	break;
+			                    	}
+			                    },
+			                         
+			                    error: function (jqXHR, textStatus, errorThrown){
+			                        alert("error - HTTP STATUS: "+jqXHR.status);
+			                    },
+			                         
+			                    complete: function(jqXHR, textStatus){			                        
+			                    }                    
+			                });
+						});
+					})
 				});
 				
 				$('#bidListModal').on('show.bs.modal', function (event) {					
@@ -131,13 +183,13 @@ require(
 					var table;
 					if ( $.fn.dataTable.isDataTable( '#biddingTable' ) ) {
 					    table = $('#biddingTable').DataTable();
-					    table.ajax.url( './bids/' + itemId ).load();
+					    table.ajax.url( '../bids/' + itemId ).load();
 					}
 					else {
 						table = $('#biddingTable').DataTable({
 							'retrieve': true,
 							'ajax' : {
-								'url': './bids/' + itemId,
+								'url': '../bids/' + itemId,
 								'type': 'POST'
 							},
 							'columns': [

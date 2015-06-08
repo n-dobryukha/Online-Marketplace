@@ -90,9 +90,10 @@ public class OracleBidDaoTest {
 
 			List<Bid> bids = oraBidDao.getBidsByItemId(itemId);
 			Assert.assertEquals(params.length, bids.size());
-			for (int i = 0; i < bids.size(); i++) {
+			int bidsCount = bids.size();
+			for (int i = 0; i < bidsCount; i++) {
 				Bid bid = bids.get(i);
-				Assert.assertArrayEquals(params[i], bid.getFieldsValues());
+				Assert.assertArrayEquals(params[bidsCount - i - 1], bid.getFieldsValues());
 			}
 		} catch (SQLException e) {
 			System.err.println(e);
