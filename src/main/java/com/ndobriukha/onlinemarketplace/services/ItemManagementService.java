@@ -164,12 +164,14 @@ public class ItemManagementService {
 			OracleItemDao oraItemDao = (OracleItemDao) oraFactory.getDao(oraFactory.getContext(), Item.class);
 			List<Item> items = oraItemDao.getAll();
 			for (Item item: items) {
-				if (item.isSold() || (item.getSellerId() == user.getId())) {
+				if (item.isSold()) { // || (item.getSellerId().equals(user.getId()))) {
 					continue;
 				}
 				Map<String, Object> dataItem = buildItemData(item);
 				if (UserManagementService.GUEST_ROLE.equals(req.getSession().getAttribute("Role"))) {
 					dataItem.put("action", "");
+				} else if (item.getSellerId().equals(user.getId())) {
+					dataItem.put("action", "edit");
 				}
 				data.add(dataItem);
 			}			
@@ -205,8 +207,8 @@ public class ItemManagementService {
 						isInclude = true;
 						break;
 					}
-				}				
-				if ((!isInclude) && (item.getSellerId() != user.getId())) {
+				}
+				if ((!isInclude) && (!item.getSellerId().equals(user.getId()))) {
 					continue;
 				}
 				Map<String, Object> dataItem = buildItemData(item);
